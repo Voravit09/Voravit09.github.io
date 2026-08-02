@@ -1,71 +1,410 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="css/index.css" />
-        <script src="js/index.js"></script>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap"
-            rel="stylesheet"
-        />
-        <title>Voravit Supak</title>
-    </head>
-    <body>
-        <div class="content-warpper">
-            <div class="bg-profile">
-                <img
-                    class="profile"
-                    src="https://bio.linkcdn.cc/upload/2025022412/174039879706356315.jpg"
-                    art="profile"
-                />
-            </div>
-            <div class="username">
-                <p>Voravit Supak</p>
-                <img
-                    class="verify"
-                    src="https://img2.pic.in.th/1000606663.png"
-                    alt="verify"
-                />
-            </div>
-            <div>
-                <div
-                    class="fb"
-                    onclick="window.open('https://www.facebook.com/share/1MMkZb18dK/', '_blank');"
-                >
-                    <img class="logo" src="/icon/facebook.png" alt="Facebook" />
-                    <a>Facebook</a>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voravit Supak</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background-color: #050505;
+            overflow-x: hidden;
+            font-family: 'Outfit', 'Noto Sans Thai', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- LOADER STYLES --- */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out, visibility 1s;
+            overflow: hidden;
+        }
+
+        .loader-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .text-stage {
+            position: relative;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .magic-text-container {
+            position: relative;
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.05em;
+            white-space: nowrap;
+            display: flex;
+            gap: 0;
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .char {
+            display: inline-block;
+            position: relative;
+            opacity: 0; 
+            transform: translateX(-10px) scale(0.8);
+            filter: blur(4px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 0;
+            overflow: hidden;
+        }
+
+        .parent-char {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            filter: blur(0);
+            z-index: 10;
+            width: auto;
+        }
+
+        .expanded {
+            gap: 0.3em;
+            letter-spacing: 0.05em;
+        }
+
+        .expanded .char {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            filter: blur(0);
+            width: auto;
+        }
+
+        .group-v .char:nth-child(1) { transition-delay: 0.0s; }
+        .group-v .char:nth-child(2) { transition-delay: 0.05s; }
+        .group-v .char:nth-child(3) { transition-delay: 0.10s; }
+        .group-v .char:nth-child(4) { transition-delay: 0.15s; }
+        .group-v .char:nth-child(5) { transition-delay: 0.20s; }
+        .group-v .char:nth-child(6) { transition-delay: 0.25s; }
+        .group-v .char:nth-child(7) { transition-delay: 0.30s; }
+
+        .group-s .char:nth-child(1) { transition-delay: 0.40s; }
+        .group-s .char:nth-child(2) { transition-delay: 0.45s; }
+        .group-s .char:nth-child(3) { transition-delay: 0.50s; }
+        .group-s .char:nth-child(4) { transition-delay: 0.55s; }
+        .group-s .char:nth-child(5) { transition-delay: 0.60s; }
+
+        /* NEON TEXT EFFECT */
+        .neon-effect {
+            position: relative;
+            color: #fff;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 15px #fff,
+                0 0 20px #4f46e5,
+                0 0 35px #4f46e5,
+                0 0 40px #4f46e5;
+        }
+
+        /* REFLECTION EFFECT */
+        .reflection-effect {
+            position: relative;
+        }
+
+        .reflection-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            animation: reflection-move 3s linear infinite;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 100%
+            );
+            background-size: 200% 100%;
+            background-repeat: no-repeat;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            mix-blend-mode: overlay;
+        }
+
+        @keyframes reflection-move {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+
+        .fly-away {
+            animation: flyAway 0.8s ease-in forwards;
+        }
+
+        @keyframes flyAway {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            100% { transform: scale(1.1) translateY(-40px); opacity: 0; filter: blur(10px); }
+        }
+
+
+        /* --- MAIN CONTENT STYLES --- */
+        .glass-card {
+            background: rgba(20, 20, 25, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: moveBlob 25s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, #4f46e5 0%, transparent 70%); }
+        .blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, #ec4899 0%, transparent 70%); animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 40%; width: 400px; height: 400px; background: radial-gradient(circle, #06b6d4 0%, transparent 70%); animation-delay: -10s; }
+
+        @keyframes moveBlob {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(30px, 30px) rotate(10deg); }
+        }
+
+        .link-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .link-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: 0.5s;
+        }
+        .link-item:hover::before { left: 100%; }
+        .link-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .name-entrance {
+            animation: slideInName 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes slideInName {
+            from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+    </style>
+</head>
+<body class="text-white min-h-screen flex items-center justify-center p-4 relative selection:bg-indigo-500 selection:text-white">
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader">
+        <div class="text-stage">
+            <div class="magic-text-container" id="loader-text">
+                <!-- V Group -->
+                <div class="group-v">
+                    <span class="char parent-char">V</span><span class="char">o</span><span class="char">r</span><span class="char">a</span><span class="char">v</span><span class="char">i</span><span class="char">t</span>
                 </div>
-                <div
-                    class="ig"
-                    onclick="window.open('https://www.instagram.com/voravit_supak?igsh=ZmJudHQ2ajdmOXU4', '_blank');"
-                >
-                    <img
-                        class="logo"
-                        src="/icon/instagram.png"
-                        alt="instargram"
-                    />
-                    <a>instargram</a>
-                </div>
-                <div
-                    class="git"
-                    onclick="window.open('https://github.com/Voravit09', '_blank');"
-                >
-                    <img class="logo" src="/icon/github.png" alt="Github" />
-                    <a>Github</a>
-                </div>
-                <div
-                    class="dis"
-                    onclick="window.open('https://discord.gg/qUV7AKt3', '_blank');"
-                >
-                    <img class="logo" src="/icon/discord.png" alt="Discord" />
-                    <a>Discord</a>
+                <!-- S Group -->
+                <div class="group-s">
+                    <span class="char parent-char">S</span><span class="char">u</span><span class="char">p</span><span class="char">a</span><span class="char">k</span>
                 </div>
             </div>
         </div>
-        <div class="bg-blur-layer"></div>
-        <body></body>
-    </body>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="absolute inset-0 opacity-[0.04]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%221%22/%3E%3C/svg%3E');"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="w-full max-w-md z-10">
+        <div class="glass-card rounded-3xl p-8 md:p-10 flex flex-col items-center text-center fade-up" id="main-card">
+            
+            <!-- Profile Image Container -->
+            <div class="relative mb-6 group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative w-32 h-32 md:w-36 md:h-36 rounded-full p-1 bg-black/40 backdrop-blur-sm">
+                    <img 
+                        class="w-full h-full object-cover rounded-full border border-white/10 shadow-2xl"
+                        src="https://bio.linkcdn.cc/upload/2025022412/174039879706356315.jpg" 
+                        alt="Voravit Supak Profile"
+                    />
+                </div>
+                <div class="absolute bottom-2 right-2 w-4 h-4 bg-green-500 border-2 border-[#050505] rounded-full shadow-lg animate-pulse"></div>
+            </div>
+
+            <!-- Username & Verify -->
+            <div class="flex items-center gap-2 mb-2">
+                <h1 class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400 name-entrance">
+                    Voravit Supak
+                </h1>
+                <img 
+                    class="w-6 h-6 drop-shadow-md name-entrance"
+                    src="https://img2.pic.in.th/1000606663.png" 
+                    alt="Verified Badge"
+                    style="animation-delay: 0.2s;"
+                />
+            </div>
+            
+            <p class="text-gray-400 text-sm mb-8 font-light tracking-wide name-entrance" style="animation-delay: 0.3s;">Frontend Developer & Designer</p>
+
+            <!-- Links Container -->
+            <div class="w-full space-y-3">
+                
+                <!-- Facebook -->
+                <a href="https://www.facebook.com/share/1MMkZb18dK/" target="_blank" class="link-item group flex items-center w-full p-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-[#1877F2]/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <img class="w-5 h-5" src="/icon/facebook.png" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons/icons/facebook.svg'" alt="FB" />
+                    </div>
+                    <span class="font-medium text-gray-200 group-hover:text-white transition-colors">Facebook</span>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </a>
+
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/voravit_supak?igsh=ZmJudHQ2ajdmOXU4" target="_blank" class="link-item group flex items-center w-full p-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-[#E4405F]/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <img class="w-5 h-5" src="/icon/instagram.png" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons/icons/instagram.svg'" alt="IG" />
+                    </div>
+                    <span class="font-medium text-gray-200 group-hover:text-white transition-colors">Instagram</span>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </a>
+
+                <!-- Github -->
+                <a href="https://github.com/Voravit09" target="_blank" class="link-item group flex items-center w-full p-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <img class="w-5 h-5 invert" src="/icon/github.png" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons/icons/github.svg'" alt="Github" />
+                    </div>
+                    <span class="font-medium text-gray-200 group-hover:text-white transition-colors">Github</span>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </a>
+
+                <!-- Discord -->
+                <a href="https://discord.gg/qUV7AKt3" target="_blank" class="link-item group flex items-center w-full p-3.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 cursor-pointer">
+                    <div class="w-10 h-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                        <img class="w-5 h-5" src="/icon/discord.png" onerror="this.src='https://cdn.jsdelivr.net/npm/simple-icons/icons/discord.svg'" alt="Discord" />
+                    </div>
+                    <span class="font-medium text-gray-200 group-hover:text-white transition-colors">Discord</span>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-10 text-xs text-gray-600 font-light tracking-widest uppercase opacity-70">
+                © 2026 Voravit Supak
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            const loaderTextContainer = document.getElementById('loader-text');
+            const mainCard = document.getElementById('main-card');
+            
+            // Timeline Configuration
+            
+            // 1. Start as "VS" (Already visible via .parent-char CSS)
+            
+            // 2. At 2.5s: Expand letters out of V and S
+            setTimeout(() => {
+                loaderTextContainer.classList.add('expanded');
+            }, 2500);
+
+            // 3. At 4.5s: Apply Neon + Reflection Effect
+            setTimeout(() => {
+                // Apply to each character individually to ensure uniformity
+                const allChars = document.querySelectorAll('.char');
+                allChars.forEach(char => {
+                    char.classList.add('neon-effect', 'reflection-effect');
+                });
+            }, 4500);
+
+            // 4. At 6.0s: Fly away and exit
+            setTimeout(() => {
+                const allChars = document.querySelectorAll('.char');
+                allChars.forEach(char => {
+                    char.classList.remove('neon-effect', 'reflection-effect');
+                    char.classList.add('fly-away');
+                });
+            }, 6000);
+
+            // 5. At 6.8s: Remove Loader completely and show Bio
+            setTimeout(() => {
+                loader.classList.add('loader-hidden');
+                setTimeout(() => {
+                    mainCard.classList.add('visible');
+                }, 300);
+            }, 6800);
+        });
+
+        // Parallax effect for background blobs
+        document.addEventListener('mousemove', (e) => {
+            const blobs = document.querySelectorAll('.blob');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            blobs.forEach((blob, index) => {
+                const speed = (index + 1) * 30;
+                const xOffset = (window.innerWidth / 2 - e.clientX) / speed;
+                const yOffset = (window.innerHeight / 2 - e.clientY) / speed;
+                blob.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            });
+        });
+    </script>
+</body>
 </html>
